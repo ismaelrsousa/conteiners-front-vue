@@ -79,11 +79,35 @@
     <table class="table striped ui celled">
       <thead>
         <tr>
-          <th>Número do Conteiner</th>
-          <th>Tipo</th>
-          <th>Data inicio</th>
-          <th>Data fim</th>
-          <th>Cliente</th>
+          <th @click="order('container.numeroConteiner')">
+            Número do Conteiner
+            <i v-show="ordered == 'container.numeroConteiner' && asc" class="sort down icon"></i>
+            <i v-show="ordered == 'container.numeroConteiner' && !asc" class="sort up icon"></i>
+          </th>
+
+          <th @click="order('tipo')">
+            Tipo
+            <i v-show="ordered == 'tipo' && asc" class="sort down icon"></i>
+            <i v-show="ordered == 'tipo' && !asc" class="sort up icon"></i>
+          </th>
+
+          <th @click="order('inicio')">
+            Data Inicio
+            <i v-show="ordered == 'inicio' && asc" class="sort down icon"></i>
+            <i v-show="ordered == 'inicio' && !asc" class="sort up icon"></i>
+          </th>
+
+          <th @click="order('fim')">
+            Data Fim
+            <i v-show="ordered == 'fim' && asc" class="sort down icon"></i>
+            <i v-show="ordered == 'fim' && !asc" class="sort up icon"></i>
+          </th>
+
+          <th @click="order('container.cliente')">
+            Cliente
+            <i v-show="ordered == 'container.cliente' && asc" class="sort down icon"></i>
+            <i v-show="ordered == 'container.cliente' && !asc" class="sort up icon"></i>
+          </th>
           <th></th>
         </tr>
       </thead>
@@ -219,6 +243,57 @@ export default {
         let index = this.movimentacoes.findIndex((find) => { return find.id == data.movimentacao.id; });
         this.movimentacoes[index] = data.movimentacao;
       }
+    },
+
+    order: function(slug) {
+      let newslug = "";
+      let subslug = "";
+
+      if(slug.includes('.')) {
+        newslug = "conteiner";
+        subslug = "numeroConteiner";
+      }
+
+      if(this.ordered == slug && this.asc) {
+        this.movimentacoes.sort(function(a, b) {
+          if(subslug != "")
+            return b[newslug][subslug].localeCompare(a[newslug][subslug]);
+
+          else
+            return b[slug].localeCompare(a[slug]);
+        });
+
+        this.filteredMovimentacoes.sort(function(a, b) {
+          if(subslug != "")
+            return b[newslug][subslug].localeCompare(a[newslug][subslug]);
+
+          else
+            return b[slug].localeCompare(a[slug]);
+        });
+
+        this.asc = false;
+      }
+      else {
+        this.movimentacoes.sort(function(a, b) {
+          if(subslug != "")
+            return a[newslug][subslug].localeCompare(b[newslug][subslug]);
+
+          else
+            return a[slug].localeCompare(b[slug]);
+        });
+
+        this.filteredMovimentacoes.sort(function(a, b) {
+          if(subslug != "")
+            return a[newslug][subslug].localeCompare(b[newslug][subslug]);
+
+          else
+            return a[slug].localeCompare(b[slug]);
+        });
+        
+        this.asc = true;
+      }
+
+      this.ordered = slug;
     },
   }
 }
