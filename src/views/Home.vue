@@ -79,17 +79,41 @@
     <table class="table striped ui celled">
       <thead>
         <tr>
-          <th>Número do Conteiner</th>
-          <th>Cliente</th>
-          <th>Categoria</th>
-          <th>Tipo</th>
-          <th>Status</th>
+          <th @click="order('numeroConteiner')">
+            Número do Conteiner
+            <i v-show="ordered == 'numeroConteiner' && asc" class="sort down icon"></i>
+            <i v-show="ordered == 'numeroConteiner' && !asc" class="sort up icon"></i>
+          </th>
+
+          <th @click="order('cliente')">
+            Cliente
+            <i v-show="ordered == 'cliente' && asc" class="sort down icon"></i>
+            <i v-show="ordered == 'cliente' && !asc" class="sort up icon"></i>
+          </th>
+
+          <th @click="order('categoria')">
+            Categoria
+            <i v-show="ordered == 'categoria' && asc" class="sort down icon"></i>
+            <i v-show="ordered == 'categoria' && !asc" class="sort up icon"></i>
+          </th>
+
+          <th @click="order('tipo')">
+            Tipo
+            <i v-show="ordered == 'tipo' && asc" class="sort down icon"></i>
+            <i v-show="ordered == 'tipo' && !asc" class="sort up icon"></i>
+          </th>
+
+          <th @click="order('status')">
+            Status
+            <i v-show="ordered == 'status' && asc" class="sort down icon"></i>
+            <i v-show="ordered == 'status' && !asc" class="sort up icon"></i>
+          </th>
           <th></th>
         </tr>
       </thead>
 
       <tbody>
-        <tr v-for="conteiner in conteiners" :key="conteiner.id">
+        <tr v-for="conteiner in (filtered? filteredConteiners : conteiners)" :key="conteiner.id">
           <td>{{ conteiner.numeroConteiner }}</td>
           <td>{{ conteiner.cliente }}</td>
           <td>{{ conteiner.categoria }}</td>
@@ -131,6 +155,10 @@ export default {
   data() {
     return {
       conteiners: [],
+      filteredConteiners: [],
+
+      ordered: null,
+      asc: false,
 
       editConteiner: {},
 
@@ -197,6 +225,33 @@ export default {
         let index = this.conteiners.findIndex((find) => { return find.id == data.conteiner.id; })
         this.conteiners[index] = data.conteiner;
       }
+    },
+
+    order: function(slug) {
+      if(this.ordered == slug && this.asc) {
+        this.conteiners.sort(function(a, b) {
+          return b[slug].toString().localeCompare(a[slug]);
+        });
+
+        this.filteredConteiners.sort(function(a, b) {
+          return b[slug].toString().localeCompare(a[slug]);
+        });
+
+        this.asc = false;
+      }
+      else {
+        this.conteiners.sort(function(a, b) {
+          return a[slug].toString().localeCompare(b[slug]);
+        });
+
+        this.filteredConteiners.sort(function(a, b) {
+          return a[slug].toString().localeCompare(b[slug]);
+        });
+        
+        this.asc = true;
+      }
+
+      this.ordered = slug;
     }
   }
 }
