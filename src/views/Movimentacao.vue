@@ -23,7 +23,7 @@
           <div class="column">
             <div class="field">
               <label>Tipo:</label>
-              <select class="ui dropdown">
+              <select v-model="searchMovimentacao.tipo" class="ui dropdown">
                 <option value="">Selecione</option>
                 <option value="Embarque">Embarque</option>
                 <option value="Descarga">Descarga</option>
@@ -39,21 +39,21 @@
           <div class="column">
             <div class="field">
               <label>Data início:</label>
-              <input type="datetime-local">
+              <input v-model="searchMovimentacao.inicio" type="datetime-local">
             </div>
           </div>
 
           <div class="column">
             <div class="field">
               <label>Data Fim:</label>
-              <input type="datetime-local">
+              <input v-model="searchMovimentacao.fim" type="datetime-local">
             </div>
           </div>
 
           <div class="column">
             <div class="field">
               <label>Conteiner:</label>
-              <select class="ui dropdown">
+              <select v-model="searchMovimentacao.conteiner.numeroConteiner" class="ui dropdown">
                 <option value="">Selecione</option>
                 <option v-for="conteiner in conteiners" :value="conteiner.id" :key="conteiner.id">{{ conteiner.numeroConteiner }}</option>
               </select>
@@ -63,7 +63,7 @@
           <div class="column">
             <div class="field">
               <label>Cliente:</label>
-              <input type="text">
+              <input v-model="searchMovimentacao.conteiner.cliente" type="text">
             </div>
           </div>
         </div>
@@ -113,7 +113,7 @@
       </thead>
 
       <tbody>
-        <tr v-for="movimentacao in movimentacoes" :key="movimentacao.id">
+        <tr v-for="movimentacao in (filtered? filteredMovimentacoes : movimentacoes)" :key="movimentacao.id">
           <td>{{ movimentacao.conteiner.numeroConteiner }}</td>
           <td>{{ movimentacao.tipo }}</td>
           <td>{{ movimentacao.inicio }}</td>
@@ -172,12 +172,14 @@ export default {
       messageText: "",
 
       searchMovimentacao: {
-        numeroConteiner: "",
-        cliente: "",
-        categoria: "",
         tipo: "",
-        status: "",
-      }
+        inicio: "",
+        fim: "",
+        conteiner: {
+          numeroConteiner: "",
+          cliente: ""
+        }
+      },
     }
   },
 
@@ -295,6 +297,32 @@ export default {
 
       this.ordered = slug;
     },
+
+    filter: function(e) {
+      e.preventDefault();
+
+      this.filteredMovimentacoes = this.movimentacoes.filter((c) => {
+        return c['tipo'].includes(this.searchMovimentacao.tipo);
+      });
+
+      this.filteredMovimentacoes = this.filteredMovimentacoes.filter((c) => {
+        return c['inicio'].includes(this.searchMovimentacao.inicio);
+      });
+
+      this.filteredMovimentacoes = this.filteredMovimentacoes.filter((c) => {
+        return c['fim'].includes(this.searchMovimentacao.fim);
+      });
+
+      this.filteredMovimentacoes = this.filteredMovimentacoes.filter((c) => {
+        return c['conteiner']['id'].toString().includes(this.searchMovimentacao.conteiner.numeroConteiner);
+      });
+
+      this.filteredMovimentacoes = this.filteredMovimentacoes.filter((c) => {
+        return c['conteiner']['cliente'].toString().toLowerCase().includes(this.searchMovimentacao.conteiner.cliente);
+      });
+
+      this.filtered = true;
+    }
   }
 }
 </script>
