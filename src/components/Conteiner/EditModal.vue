@@ -13,21 +13,21 @@
             <p>Erro ao cadastrar o conteiner, verifique os dados e tente novamente</p>
           </div>
 
-          <form class="ui form" id="form" @submit="createConteiner">
+          <form class="ui form" ref="form" @submit="editConteiner">
             <div class="field">
               <label>Cliente:</label>
-              <input type="text" name="cliente" placeholder="Ex: Gustavo Silva" required>
+              <input v-bind:value="PropConteiner.cliente" type="text" name="cliente" placeholder="Ex: Gustavo Silva" required>
             </div>
 
             <div class="field">
               <label>Número do Conteiner:</label>
-              <input maxlength="11" type="text" name="numero" placeholder="XXXX0000000" required>
+              <input v-bind:value="PropConteiner.numeroConteiner" maxlength="11" type="text" name="numero" placeholder="XXXX0000000" required>
             </div>
 
             <div class="fields two">
               <div class="field">
                 <label>Tipo:</label>
-                <select name="tipo" class="ui dropdown" required>
+                <select v-bind:value="PropConteiner.tipo" name="tipo" class="ui dropdown" required>
                   <option value="">Selecione</option>
                   <option value="20">20</option>
                   <option value="40">40</option>
@@ -36,7 +36,7 @@
 
               <div class="field">
                 <label>Status:</label>
-                <select name="status" class="ui dropdown" required>
+                <select v-bind:value="PropConteiner.status" name="status" class="ui dropdown" required>
                   <option value="">Selecione</option>
                   <option value="0">Vazio</option>
                   <option value="1">Cheio</option>
@@ -46,7 +46,7 @@
 
             <div class="field">
               <label>Categoria:</label>
-              <select name="categoria" class="ui dropdown" required>
+              <select v-bind:value="PropConteiner.categoria" name="categoria" class="ui dropdown" required>
                 <option value="">Selecione</option>
                 <option value="Importação">Importação</option>
                 <option value="Exportação">Exportação</option>
@@ -58,7 +58,7 @@
       <div class="actions">
         <div class="ui button basic" @click="hideModal">Cancelar</div>
 
-        <div class="ui button primary" @click="createConteiner">Cadastrar</div>
+        <div class="ui button primary" @click="editConteiner">Cadastrar</div>
       </div>
     </div>
   </div>
@@ -70,13 +70,17 @@ import { api_url } from '../../main';
 
 export default {
   name: 'EditModal',
+  props: [
+    'PropConteiner'
+  ],
   components: {
     
   },
 
   data() {
     return {
-      conteiners: []
+      conteiners: [],
+      message: false
     }
   },
 
@@ -89,38 +93,38 @@ export default {
       document.getElementById("editModal").classList.remove('active');
     },
 
-    createConteiner: function() {
-      let inputs = document.getElementById("form").elements;
+    editConteiner: function() {
+      let inputs = this.$refs.form.elements;
 
       let conteiner = {
+        id: this.PropConteiner.id,
         cliente: inputs.cliente.value,
         numeroConteiner: inputs.numero.value,
         tipo: inputs.tipo.value,
         status: inputs.status.value,
-        categoria: inputs.categoria.value
-      }
+        categoria: inputs.categoria.value,
+      };
 
-      axios.post(
+      axios.put(
         `${api_url}/conteiner`,
         conteiner
       ).then((res) => {
-          let code = res.data.statusCode;
+        let code = res.data.statusCode;
 
-          if(code == 400)
-            this.message = true;
-          
+        if(code == 400)
+          this.message = true;
 
-          else if(code == 200) {
-            this.message = false;
-            this.hideModal();
-            this.$emit('successMessage',
-              {
-                message: 'Conteiner cadastrado com sucesso',
-                type: 'create',
-                conteiner
-              }
-            )
-          }
+        else if(code == 200) {
+          this.message = false;
+          this.hideModal();
+          this.$emit('successMessage',
+            {
+              message: "Conteiner editado com sucesso!",
+              type: "edit",
+              conteiner
+            }
+          )
+        }
       });
     }
   }

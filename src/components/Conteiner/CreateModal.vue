@@ -76,7 +76,7 @@ export default {
 
   data() {
     return {
-      conteiners: []
+      message: false
     }
   },
 
@@ -97,30 +97,29 @@ export default {
         numeroConteiner: inputs.numero.value,
         tipo: inputs.tipo.value,
         status: inputs.status.value,
-        categoria: inputs.categoria.value
-      }
+        categoria: inputs.categoria.value,
+      };
 
       axios.post(
         `${api_url}/conteiner`,
         conteiner
       ).then((res) => {
-          let code = res.data.statusCode;
+        let code = res.data.statusCode;
 
-          if(code == 400)
-            this.message = true;
-          
+        if(code == 400)
+          this.message = true;
 
-          else if(code == 200) {
-            this.message = false;
-            this.hideModal();
-            this.$emit('successMessage',
-              {
-                message: 'Conteiner cadastrado com sucesso',
-                type: 'create',
-                conteiner
-              }
-            )
-          }
+        else if(code == 200) {
+          this.message = false;
+          this.hideModal();
+          this.$emit('successMessage',
+            {
+              message: "Conteiner cadastrado com sucesso!",
+              type: "create",
+              conteiner
+            }
+          )
+        }
       });
     }
   }

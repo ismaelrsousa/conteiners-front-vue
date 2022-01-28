@@ -4,4 +4,4 @@ import router from './router'
 
 createApp(App).use(router).mount('#app')
 
-export const api_url = "https://localhost:7003/api";
+export const api_url = "https://localhost:7166/api";

@@ -89,18 +89,18 @@
       </thead>
 
       <tbody>
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+        <tr v-for="conteiner in conteiners" :key="conteiner.id">
+          <td>{{ conteiner.numeroConteiner }}</td>
+          <td>{{ conteiner.cliente }}</td>
+          <td>{{ conteiner.categoria }}</td>
+          <td>{{ conteiner.tipo }}</td>
+          <td>{{ conteiner.status == 1 ? 'Cheio' : 'Vazio' }}</td>
           <td>
-            <button class="ui icon basic button" @click="showEditModal">
+            <button class="ui icon basic button" @click="showEditModal(conteiner.id)">
               <i class="icon pencil alternate"></i>
             </button>
 
-            <button class="ui icon basic button" @click="showDelete">
+            <button class="ui icon basic button" @click="showDelete(conteiner.id)">
               <i class="icon trash red"></i>
             </button>
           </td>
@@ -108,13 +108,15 @@
       </tbody>
     </table>
 
-    <CreateModal id="createModal"/>
-    <EditModal id="editModal"/>
+    <CreateModal @successMessage="showMessage" id="createModal"/>
+    <EditModal @successMessage="showMessage" :PropConteiner="editConteiner" id="editModal"/>
     
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+import { api_url } from "../main";
 
 import CreateModal from '../components/Conteiner/CreateModal';
 import EditModal from '../components/Conteiner/EditModal';
@@ -130,6 +132,8 @@ export default {
     return {
       conteiners: [],
 
+      editConteiner: {},
+
       message: false,
       messageText: ""
     }
@@ -141,24 +145,58 @@ export default {
 
   methods: {
     fillList: function() {
-      
+      axios.get(`${api_url}/conteiner`)
+        .then((res) => {
+          this.conteiners = res.data;
+        })
     },
 
     showCreateModal: function() {
       document.getElementById("createModal").classList.add("active");
     },
 
-    showEditModal: function() {
+    showEditModal: function(id) {
       document.getElementById("editModal").classList.add("active");
+      this.message = false;
+
+      this.editConteiner = this.conteiners.filter((data) => { return data.id == id; })[0];
     },
 
-    showDelete: function() {
-      confirm("Tem certeza que deseja deletar esse registro?");
+    showDelete: function(id) {
+      let result = confirm("Tem certeza que deseja deletar esse registro?");
+
+      this.message = false;
+
+      if(result) {
+        axios.delete(
+          `${api_url}/conteiner/${id}`,
+        ).then((res) => {
+          let code = res.data.statusCode;
+
+          if(code == 400)
+            alert("Não foi possível deletear esse registro, tente novamente")
+
+          else if(code == 200) {
+            this.message = true;
+            this.messageText = "Registro deletado com sucesso!";
+
+            let index = this.conteiners.findIndex((find) => { return find.id == id; });
+            this.conteiners.splice(index, 1);
+          }
+        });
+      }
     },
 
     showMessage: function(data) {
       this.message = true;
       this.messageText = data.message;
+
+      if(data.type == "create") this.conteiners.unshift(data.conteiner);
+
+      else if(data.type == "edit") {
+        let index = this.conteiners.findIndex((find) => { return find.id == data.conteiner.id; })
+        this.conteiners[index] = data.conteiner;
+      }
     }
   }
 }
