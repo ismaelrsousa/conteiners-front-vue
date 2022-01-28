@@ -14,14 +14,6 @@
 
           <form class="ui form" id="form" @submit="createMovimentacao">
             <div class="field">
-              <div class="field">
-                <label>Número do Conteiner:</label>
-                <select name="conteinerId" class="ui dropdown">
-                  <option value="">Selecione</option>
-                  <option v-for="conteiner in conteiners" :value="conteiner.id" :key="conteiner.id">{{ conteiner.numeroConteiner }}</option>
-                </select>
-              </div>
-
               <label>Tipo:</label>
               <select name="tipo" class="ui dropdown" required>
                 <option value="">Selecione</option>
@@ -32,6 +24,14 @@
                 <option value="Reposicionamento">Reposicionamento</option>
                 <option value="Pesagem">Pesagem</option>
                 <option value="Scanner">Scanner</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Conteiner:</label>
+              <select name="conteinerId" class="ui dropdown">
+                <option value="">Selecione</option>
+                <option v-for="conteiner in conteiners" :value="conteiner.id" :key="conteiner.id">{{ conteiner.numeroConteiner }}</option>
               </select>
             </div>
 
@@ -71,7 +71,6 @@ export default {
   data() {
     return {
       message: false,
-      required: false,
     }
   },
 

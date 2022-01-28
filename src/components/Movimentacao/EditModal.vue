@@ -12,44 +12,39 @@
             <p>Erro ao cadastrar o conteiner, tente novamente</p>
           </div>
 
-          <form class="ui form" ref="form" @submit="createConteiner">
+          <form class="ui form" ref="form" @submit="createMovimentacao">
             <div class="field">
-              <label>Cliente:</label>
-              <input type="text" name="cliente" placeholder="Ex: Gustavo Silva">
+              <label>Tipo:</label>
+              <select v-bind:value="PropMovimentacao.tipo" name="tipo" class="ui dropdown" required>
+                <option value="">Selecione</option>
+                <option value="Embarque">Embarque</option>
+                <option value="Descarga">Descarga</option>
+                <option value="Gate in">Gate in</option>
+                <option value="Gate out">Gate out</option>
+                <option value="Reposicionamento">Reposicionamento</option>
+                <option value="Pesagem">Pesagem</option>
+                <option value="Scanner">Scanner</option>
+              </select>
             </div>
 
             <div class="field">
-              <label>Número do Conteiner:</label>
-              <input maxlength="11" type="text" name="numero" placeholder="XXXX0000000">
+              <label>Conteiner:</label>
+              <select v-bind:value="PropMovimentacao.conteiner.id" name="conteinerId" class="ui dropdown">
+                <option value="">Selecione</option>
+                <option v-for="conteiner in conteiners" :value="conteiner.id" :key="conteiner.id">{{ conteiner.numeroConteiner }}</option>
+              </select>
             </div>
 
             <div class="fields two">
               <div class="field">
-                <label>Tipo:</label>
-                <select name="tipo" class="ui dropdown">
-                  <option value="">Selecione</option>
-                  <option value="20">20</option>
-                  <option value="40">40</option>
-                </select>
+                <label>Data inicio:</label>
+                <input v-bind:value="PropMovimentacao.inicio" name="inicio" type="datetime-local">
               </div>
 
               <div class="field">
-                <label>Status:</label>
-                <select name="status" class="ui dropdown">
-                  <option value="">Selecione</option>
-                  <option value="0">Vazio</option>
-                  <option value="1">Cheio</option>
-                </select>
+                <label>Data Fim:</label>
+                <input v-bind:value="PropMovimentacao.fim" name="fim" type="datetime-local">
               </div>
-            </div>
-
-            <div class="field">
-              <label>Categoria:</label>
-              <select name="categoria" class="ui dropdown">
-                <option value="">Selecione</option>
-                <option value="Importação">Importação</option>
-                <option value="Exportação">Exportação</option>
-              </select>
             </div>
           </form>
         </div>
@@ -65,6 +60,9 @@
 </template>
 
 <script>
+import axios from "axios";
+import { api_url } from '../../main.js';
+
 export default {
   name: 'EditModal',
 
@@ -86,7 +84,43 @@ export default {
     },
 
     editConteiner: function() {
-      
+      let inputs = this.$refs.form.elements;
+
+      let conteiner = this.conteiners.filter((c) => {
+        return c['id'].toString().includes(inputs.conteinerId.value);
+      });
+
+      let movimentacao = {
+        id: this.PropMovimentacao.id,
+        tipo: inputs.tipo.value,
+        conteinerId: inputs.conteinerId.value,
+        inicio: inputs.inicio.value,
+        fim: inputs.fim.value,
+      }
+
+      axios.put(
+        `${api_url}/movimentacao`,
+        movimentacao
+      ).then((res) => {
+        let code = res.data.statusCode;
+
+        movimentacao.conteiner = conteiner[0];
+
+        if(code == 400) {
+          this.message = true;
+        }
+
+        else if(code == 200) {
+          this.message = false;
+          this.hideModal();
+          this.$emit('successMessage',
+            {
+              message: "Movimentação Editada com sucesso",
+              type: 'edit',
+              movimentacao
+          });
+        }
+      });
     }
   }
 }

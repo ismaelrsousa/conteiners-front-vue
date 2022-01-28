@@ -89,18 +89,18 @@
       </thead>
 
       <tbody>
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+        <tr v-for="movimentacao in movimentacoes" :key="movimentacao.id">
+          <td>{{ movimentacao.conteiner.numeroConteiner }}</td>
+          <td>{{ movimentacao.tipo }}</td>
+          <td>{{ movimentacao.inicio }}</td>
+          <td>{{ movimentacao.fim }}</td>
+          <td>{{ movimentacao.conteiner.cliente }}</td>
           <td>
-            <button class="ui icon basic button" @click="showEditModal">
+            <button class="ui icon basic button" @click="showEditModal(movimentacao.id)">
               <i class="icon pencil alternate"></i>
             </button>
 
-            <button class="ui icon basic button" @click="showDelete">
+            <button class="ui icon basic button" @click="showDelete(movimentacao.id)">
               <i class="icon trash red"></i>
             </button>
           </td>
@@ -108,13 +108,15 @@
       </tbody>
     </table>
 
-    <CreateModal id="createModal"/>
-    <EditModal id="editModal"/>
+    <CreateModal @successMessage="showMessage" id="createModal"/>
+    <EditModal @successMessage="showMessage" :PropMovimentacao="editMovimentacao" :conteiners="conteiners" id="editModal"/>
     
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+import { api_url } from "../main";
 
 import CreateModal from '../components/Movimentacao/CreateModal';
 import EditModal from '../components/Movimentacao/EditModal';
@@ -128,10 +130,30 @@ export default {
 
   data() {
     return {
+      movimentacoes: [],
       conteiners: [],
+      filteredMovimentacoes: [],
+
+      ordered: null,
+      filtered: false,
+      asc: false,
+
+      editMovimentacao: {
+        conteiner: {
+          id: 0
+        }
+      },
 
       message: false,
-      messageText: ""
+      messageText: "",
+
+      searchMovimentacao: {
+        numeroConteiner: "",
+        cliente: "",
+        categoria: "",
+        tipo: "",
+        status: "",
+      }
     }
   },
 
@@ -141,25 +163,63 @@ export default {
 
   methods: {
     fillList: function() {
-      
+      axios.get(`${api_url}/movimentacao`)
+        .then((res) => {
+          this.movimentacoes = res.data;
+        })
+
+      axios.get(`${api_url}/conteiner`)
+        .then((res) => {
+          this.conteiners = res.data;
+        })
     },
 
     showCreateModal: function() {
       document.getElementById("createModal").classList.add("active");
     },
 
-    showEditModal: function() {
+    showEditModal: function(id) {
       document.getElementById("editModal").classList.add("active");
+      this.message = false;
+
+      this.editMovimentacao = this.movimentacoes.filter((data) => { return data.id == id; })[0];
     },
 
-    showDelete: function() {
-      confirm("Tem certeza que deseja deletar esse registro?");
+    showDelete: function(id) {
+      let result = confirm("Tem certeza que deseja deletar esse registro?");
+      this.message = false;
+
+      if(result) {
+        axios.delete(
+          `${api_url}/movimentacao/${id}`,
+        ).then((res) => {
+          let code = res.data.statusCode;
+
+          if(code == 400)
+            alert("Não foi possível deletear esse registro, tente novamente")
+
+          else if(code == 200) {
+            this.message = true;
+            this.messageText = "Registro deletado com sucesso!";
+
+            let index = this.movimentacoes.findIndex((find) => { return find.id == id; });
+            this.movimentacoes.splice(index, 1);
+          }
+        });
+      }
     },
 
-    showMessage: function(data) {
+    showMessage: function (data) {
       this.message = true;
       this.messageText = data.message;
-    }
+
+      if(data.type == "create") this.movimentacoes.unshift(data.movimentacao);
+
+      else if(data.type == "edit") {
+        let index = this.movimentacoes.findIndex((find) => { return find.id == data.movimentacao.id; });
+        this.movimentacoes[index] = data.movimentacao;
+      }
+    },
   }
 }
 </script>
