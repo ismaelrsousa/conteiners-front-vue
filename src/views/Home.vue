@@ -23,21 +23,21 @@
           <div class="column">
             <div class="field">
               <label>Número do Conteiner:</label>
-              <input type="text" name="numeroConteiner" maxlength="11" placeholder="XXXX0000000">
+              <input v-model="searchConteiner.numeroConteiner" type="text" name="numeroConteiner" maxlength="11" placeholder="XXXX0000000">
             </div>
           </div>
 
           <div class="column">
             <div class="field">
               <label>Cliente:</label>
-              <input type="text" name="cliente" placeholder="Ex: Gustavo Silva">
+              <input v-model="searchConteiner.cliente" type="text" name="cliente" placeholder="Ex: Gustavo Silva">
             </div>
           </div>
 
           <div class="column">
             <div class="field">
               <label>Categoria:</label>
-              <select name="categoria" class="ui dropdown">
+              <select v-model="searchConteiner.categoria" name="categoria" class="ui dropdown">
                 <option value="">Selecione</option>
                 <option value="Importação">Importação</option>
                 <option value="Exportação">Exportação</option>
@@ -48,7 +48,7 @@
           <div class="column">
             <div class="field">
               <label>Tipo:</label>
-              <select name="tipo" class="ui dropdown">
+              <select v-model="searchConteiner.tipo" name="tipo" class="ui dropdown">
                 <option value="">Selecione</option>
                 <option value="20">20</option>
                 <option value="40">40</option>
@@ -59,7 +59,7 @@
           <div class="column">
             <div class="field">
               <label>Status:</label>
-              <select name="status" class="ui dropdown">
+              <select v-model="searchConteiner.status" name="status" class="ui dropdown">
                 <option value="">Selecione</option>
                 <option value="0">Vazio</option>
                 <option value="1">Cheio</option>
@@ -158,12 +158,21 @@ export default {
       filteredConteiners: [],
 
       ordered: null,
+      filtered: false,
       asc: false,
 
       editConteiner: {},
 
       message: false,
-      messageText: ""
+      messageText: "",
+
+      searchConteiner: {
+        numeroConteiner: "",
+        cliente: "",
+        categoria: "",
+        tipo: "",
+        status: "",
+      }
     }
   },
 
@@ -252,6 +261,34 @@ export default {
       }
 
       this.ordered = slug;
+    },
+
+    filter: function(e) {
+      e.preventDefault();
+
+      this.filtered = true;
+
+      this.filteredConteiners = this.conteiners.filter((c) => {
+        return c['numeroConteiner'].toLowerCase().includes(this.searchConteiner.numeroConteiner.toLowerCase());
+      });
+
+      this.filteredConteiners = this.filteredConteiners.filter((c) => {
+        return c['cliente'].toLowerCase().includes(this.searchConteiner.cliente.toLowerCase());
+      });
+
+      this.filteredConteiners = this.filteredConteiners.filter((c) => {
+        return c['categoria'].includes(this.searchConteiner.categoria);
+      });
+
+      this.filteredConteiners = this.filteredConteiners.filter((c) => {
+        return c['tipo'].includes(this.searchConteiner.tipo);
+      });
+
+      this.filteredConteiners = this.filteredConteiners.filter((c) => {
+        return c['status'].toString().includes(this.searchConteiner.status);
+      });
+
+      console.log(this.filteredConteiners);
     }
   }
 }
