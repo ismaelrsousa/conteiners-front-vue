@@ -132,7 +132,7 @@
       </tbody>
     </table>
 
-    <CreateModal @successMessage="showMessage" id="createModal"/>
+    <CreateModal @successMessage="showMessage" id="createModal" :conteiners="conteiners"/>
     <EditModal @successMessage="showMessage" :PropMovimentacao="editMovimentacao" :conteiners="conteiners" id="editModal"/>
     
   </div>
